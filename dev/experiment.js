@@ -79,6 +79,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
             hitId: hitId,
             participantID: participantID,
             category: category,
+	    familiarity: -1,
             expTimer: -1,
             response: -1,
             trial_number: trial_number,
@@ -111,6 +112,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
                 response.response = data.responses.Q0;
                 response.rt = data.rt;
                 response.expTimer = data.time_elapsed / 1000;
+		response.familiarity = data.familiarity;
 
                 // POST response data to server
                 $.ajax({

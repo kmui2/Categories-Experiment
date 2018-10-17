@@ -58,7 +58,19 @@ jsPsych.plugins['survey-text'] = (function() {
           <p class="jspsych-survey-text">${trial.questions[i]}</p>
           <input id="answer" class="form-control" name="#jspsych-survey-text-response-${i}" placeholder="Your answer..." type="text" autofocus>
           <button type="submit" id="jspsych-survey-text-next" class="jspsych-btn jspsych-survey-text" />
-        </form>
+          <div id="message"></div>
+	  <br>
+	  <h4>How familiar are you with the items pictured above?</h4>
+	  <div style="display:flex;"> 
+	   <span>Not familiar at all</span>
+	    <input type="radio" name="familiarity" value="1" style="margin-left:1em;" />
+	    <input type="radio" name="familiarity" value="2" style="margin-left:1em;" />
+	    <input type="radio" name="familiarity" value="3" style="margin-left:1em;" />
+	    <input type="radio" name="familiarity" value="4" style="margin-left:1em;" />
+	    <input type="radio" name="familiarity" value="5" style="margin-left:1em;" />
+	    <span style="margin-left:1em;">Very familiar</span>
+	  </div>
+	</form>
       `)
 
     }
@@ -69,7 +81,7 @@ jsPsych.plugins['survey-text'] = (function() {
     $("#jspsych-survey-text-next").html('Submit Answer');
     $("#jspsych-survey-text-next").click(function() {
       if ($('#answer').val().replace(/\s/g,'') == "") {
-        alert("Answer must be filled out");
+        document.querySelector('#message').innerHTML = "Answer must be filled out";
         return false;
       }
       // measure response time
@@ -79,11 +91,13 @@ jsPsych.plugins['survey-text'] = (function() {
       // create object to hold responses
       var question_data = {};
       var question_data = {Q0: $('#answer').val()};
-
+	
+      const familiarity  = Number(document.querySelector('input[name=familiarity]:checked').value);
       // save data
       var trialdata = {
         "rt": response_time,
-        "responses": question_data
+        "responses": question_data,
+        "familiarity": familiarity,
       };
 
       display_element.html('');
