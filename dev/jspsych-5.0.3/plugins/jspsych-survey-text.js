@@ -70,6 +70,7 @@ jsPsych.plugins['survey-text'] = (function() {
 	    <input type="radio" name="familiarity" value="5" style="margin-left:1em;" />
 	    <span style="margin-left:1em;">Very familiar</span>
 	  </div>
+          <div id="message-2"></div>
 	</form>
       `)
 
@@ -82,6 +83,9 @@ jsPsych.plugins['survey-text'] = (function() {
     $("#jspsych-survey-text-next").click(function() {
       if ($('#answer').val().replace(/\s/g,'') == "") {
         document.querySelector('#message').innerHTML = "Answer must be filled out";
+        return false;
+      } else if (!document.querySelector('input[name=familiarity]:checked')) {
+	document.querySelector('#message-2').innerHTML = "Answer must be filled out";
         return false;
       }
       // measure response time
