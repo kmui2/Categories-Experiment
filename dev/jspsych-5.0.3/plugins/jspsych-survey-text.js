@@ -57,7 +57,6 @@ jsPsych.plugins['survey-text'] = (function() {
         <form action="">
           <p class="jspsych-survey-text">${trial.questions[i]}</p>
           <input id="answer" class="form-control" name="#jspsych-survey-text-response-${i}" placeholder="Your answer..." type="text" autofocus>
-          <button type="submit" id="jspsych-survey-text-next" class="jspsych-btn jspsych-survey-text" />
           <div id="message"></div>
 	  <br>
 	  <h4>How familiar are you with the items pictured above?</h4>
@@ -71,6 +70,7 @@ jsPsych.plugins['survey-text'] = (function() {
 	    <span style="margin-left:1em;">Very familiar</span>
 	  </div>
           <div id="message-2"></div>
+          <button type="submit" id="jspsych-survey-text-next" class="jspsych-btn jspsych-survey-text" />
 	</form>
       `)
 
