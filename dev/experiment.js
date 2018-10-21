@@ -39,14 +39,14 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
 
     timeline.push(consent);
 
-    let welcome_block = {
-        type: "text",
-        cont_key: ' ',
-        text: `<h1>Categories Experiment</h1>
-        <p class="lead">Welcome to the experiment. Thank you for participating! Press SPACE to begin.</p>`
-    };
+    // let welcome_block = {
+    //     type: "text",
+    //     cont_key: ' ',
+    //     text: `<h1>Categories Experiment</h1>
+    //     <p class="lead">Welcome to the experiment. Thank you for participating! Press SPACE to begin.</p>`
+    // };
 
-    timeline.push(welcome_block);
+    // timeline.push(welcome_block);
 
     let continue_space = "<div class='right small'>(press SPACE to continue)</div>";
 
@@ -55,9 +55,8 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
         key_forward: ' ',
         key_backward: 8,
         pages: [
-            `<p class="lead">In this experiment, you will see images of a single category, and your job is to type your shortest and best answer that describes the images shown.
-            </p> <p class="lead">Your score will be based on how well your answer coordinates with other previous answers.
-            </p> <p class="lead">Use the your keyboard and click on the text box to type in your answer. Then, click on the displayed button to submit your answer.
+            `<p class="lead">In this experiment, you will see groups of various images images. Your job is to type out the best description that covers all of these images. For example, if you see a bunch of dogs, you should write 'dogs'.
+            </p> <p class="lead">Use the your keyboard and click on the text box to type in your answer. Then, indicate how familiar you are with the items shown, and hit 'submit'.
             </p> ${continue_space}`,
         ]
     };
@@ -136,7 +135,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
         key_forward: ' ',
         key_backward: 8,
         pages: [
-            `<p class="lead">This is a filler for instructions for the questions.
+            `<p class="lead">Thank you! We'll now ask a few demographic questions and you'll be done!
             </p> ${continue_space}`,
         ]
     };
@@ -144,34 +143,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
 
 
     window.questions = trials.questions;    // allow surveyjs to access questions
-    let IRQTrial = {
-        type: 'html',
-        url: "./IRQ/IRQ.html",
-        cont_btn: "IRQ-cmplt",
-        check_fn: function() {
-            if(IRQIsCompleted()) {
-                console.log(getIRQResponses());
-                let IRQ = Object.assign({subjCode}, getIRQResponses().answers);
-                // POST demographics data to server
-                $.ajax({
-                    url: 'http://' + document.domain + ':' + PORT + '/IRQ',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(IRQ),
-                    success: function (data) {
-                        // console.log(data);
-                        // $('#surveyElement').remove();
-                        // $('#surveyResult').remove();
-                    }
-                })
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-    };
-    timeline.push(IRQTrial);
+
 
     let demographicsTrial = {
         type: 'html',
@@ -201,15 +173,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
 
     let endmessage = `
     <p class="lead">Thank you for participating! Your completion code is ${participantID}. Copy and paste this in 
-    MTurk to get paid. If you have any questions or comments, please email jsulik@wisc.edu.</p>
-    
-    <h3>Debriefing </h3>
-    <p class="lead">
-    Thank you for your participation. The study is designed to collect information about the different ways 
-    in which people typically represent thoughts in their mind. The responses will be used in the 
-    development of a shorter questionnaire to assess differences in these representations. 
-    </p>
-    
+    MTurk to get paid. If you have any questions or comments, please email cschonberg@wisc.edu.</p>
     `
 
 
