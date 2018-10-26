@@ -55,7 +55,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
         key_forward: ' ',
         key_backward: 8,
         pages: [
-            `<p class="lead">In this experiment, you will see groups of various images images. Your job is to type out the best description that covers all of these images. For example, if you see a bunch of dogs, you should write 'dogs'.
+            `<p class="lead">In this HIT, you will see groups of various images. Your job is to type out a name that applies to all the images. For example, if you see a bunch of dogs, you should write 'dogs'. You should use as few words as possible in your response. For example, "dolls" instead of "a bunch of dolls".
             </p> <p class="lead">Use the your keyboard and click on the text box to type in your answer. Then, indicate how familiar you are with the items shown, and hit 'submit'.
             </p> ${continue_space}`,
         ]

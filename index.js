@@ -107,10 +107,11 @@ app.post('/trials', function (req, res) {
     console.log('Creating new trials');
     
     // removes existing data files if resetting
-    if (reset == 'true')
+    if (reset == 'true') {
       if (fs.existsSync('trials/' + subjCode + '_trials.txt')) fs.unlinkSync('trials/' + subjCode + '_trials.txt');
       if (fs.existsSync('data/' + subjCode + '_data.csv'))  fs.unlinkSync('data/' + subjCode + '_data.csv');
-        
+    }
+
     let categories = _.shuffle(Object.keys(categoriesCount));
     let countLists = {};
     for (let cat of categories)
