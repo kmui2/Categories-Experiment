@@ -53,10 +53,10 @@ if (fs.existsSync(catPath)){
     if (error) throw error;
     console.log(categoriesCount);
     Object.keys(categoriesCount).forEach(category => {
-      const folderLocation = `dev/17-objects/${category}`;
+      const folderLocation = `dev/images/${category}`;
       images[category] = [];
       fs.readdirSync(folderLocation).forEach(file => {
-        images[category].push(path.join('17-objects', category, file));
+        images[category].push(path.join('images', category, file));
       })
     });
     writer = csvWriter({ sendHeaders: false });
@@ -66,19 +66,19 @@ if (fs.existsSync(catPath)){
 } else {
   // Create new csv of category counts if doesn't exist.
   // Get all categories from image folders.
-  fs.readdirSync('dev/17-objects').forEach(folder => {
+  fs.readdirSync('dev/images').forEach(folder => {
     if (folder != '.DS_Store') {
       categoriesCount[folder] = 0;
       images[folder] = [];
-      fs.readdirSync('dev/17-objects/' + folder).forEach(file => {
+      fs.readdirSync('dev/images/' + folder).forEach(file => {
         if (file == 'TestItems') {
-          fs.readdirSync('dev/17-objects/' + folder + '/TestItems').forEach(file => {
+          fs.readdirSync('dev/images/' + folder + '/TestItems').forEach(file => {
             if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-              images[folder].push('17-objects/' + folder + '/TestItems/' + file);
+              images[folder].push('images/' + folder + '/TestItems/' + file);
           });
         }
         if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-          images[folder].push('17-objects/' + folder + '/' + file);
+          images[folder].push('images/' + folder + '/' + file);
       })
     }
   });
