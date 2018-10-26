@@ -35,40 +35,58 @@ app.listen(app.get('port'), function () {
   console.log("Node app is running at http://localhost:" + app.get('port'))
 })
 
-
-////////////////////////////////////////////////////////////////
-// Recursively locates all images and stores in them objects//
-/////////////////////////////////////////////////////////////
 let images = {};
 let categoriesCount = {};
-fs.readdirSync('dev/17-objects').forEach(folder => {
-  if (folder != '.DS_Store') {
-    categoriesCount[folder] = 0;
-    images[folder] = [];
-    fs.readdirSync('dev/17-objects/' + folder).forEach(file => {
-      if (file == 'TestItems') {
-        fs.readdirSync('dev/17-objects/' + folder + '/TestItems').forEach(file => {
-          if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-            images[folder].push('17-objects/' + folder + '/TestItems/' + file);
-        });
-      }
-      if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-        images[folder].push('17-objects/' + folder + '/' + file);
-    })
-  }
-});
 
 // create a new file to store category counts
 let categories = Object.keys(categoriesCount);
 let catPath = 'categoriesCount.csv';
 let headers = categories;
-if (fs.existsSync(catPath))
-  fs.unlinkSync(catPath);
-writer = csvWriter({ headers: headers });
 
-writer.pipe(fs.createWriteStream(catPath, { flags: 'a' }));
-writer.write(categoriesCount);
-writer.end();
+
+if (fs.existsSync(catPath)){
+  // Read existing category counts if csv exists.
+  csv()
+  .fromFile(catPath)
+  .on('json', (jsonObj) => {categoriesCount =  jsonObj})
+  .on('done', (error) => {
+    if (error) throw error;
+    console.log(categoriesCount);
+    Object.keys(categoriesCount).forEach(category => {
+      const folderLocation = `dev/17-objects/${category}`;
+      images[category] = [];
+      fs.readdirSync(folderLocation).forEach(file => {
+        images[category].push(path.join('17-objects', category, file));
+      })
+    });
+    writer = csvWriter({ sendHeaders: false });
+    writer.pipe(fs.createWriteStream(catPath, { flags: 'a' }));
+    writer.end();
+  })
+} else {
+  // Create new csv of category counts if doesn't exist.
+  // Get all categories from image folders.
+  fs.readdirSync('dev/17-objects').forEach(folder => {
+    if (folder != '.DS_Store') {
+      categoriesCount[folder] = 0;
+      images[folder] = [];
+      fs.readdirSync('dev/17-objects/' + folder).forEach(file => {
+        if (file == 'TestItems') {
+          fs.readdirSync('dev/17-objects/' + folder + '/TestItems').forEach(file => {
+            if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+              images[folder].push('17-objects/' + folder + '/TestItems/' + file);
+          });
+        }
+        if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+          images[folder].push('17-objects/' + folder + '/' + file);
+      })
+    }
+  });
+  writer = csvWriter({ headers: headers });
+  writer.pipe(fs.createWriteStream(catPath, { flags: 'a' }));
+  writer.write(categoriesCount);
+  writer.end();
+}
 
 // POST endpoint for requesting trials
 app.post('/trials', function (req, res) {
@@ -116,13 +134,17 @@ app.post('/trials', function (req, res) {
 
     let categories = _.shuffle(Object.keys(categoriesCount));
     let countLists = {};
-    for (let cat of categories)
+    for (let cat of categories) {
       if (!(categoriesCount[cat] in countLists))
         countLists[categoriesCount[cat]] = [cat];
       else 
         countLists[categoriesCount[cat]].push(cat);
+    }
     
-    let counts = Object.keys(countLists).sort();
+    // Add categories with the least count to subject trials
+    let counts = Object.keys(countLists).sort((a, b) => {
+      return Number(a) - Number(b);
+    });
     let subjCategories = [];
     for (let count of counts) {
         for (let cat of countLists[count]) {
@@ -134,6 +156,7 @@ app.post('/trials', function (req, res) {
         }
     }
 
+    // Write to trials file
     fs.writeFile('trials/' + subjCode + '_trials.txt', subjCategories.join('\n'), function (err) {
       if (err) return console.log(err);
       console.log("Trials list saved!");

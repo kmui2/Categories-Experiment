@@ -73,9 +73,6 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
         // Empty Response Data to be sent to be collected
         let response = {
             subjCode: subjCode,
-            workerId: workerId,
-            assignmentId: assignmentId,
-            hitId: hitId,
             participantID: participantID,
             category: category,
             familiarity: -1,            
