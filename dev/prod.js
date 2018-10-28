@@ -28,7 +28,7 @@ $(document).ready(function(){
             url: 'http://'+document.domain+':'+PORT+'/trials',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({subjCode, numTrials, reset, numPics}),
+            data: JSON.stringify({subjCode, numTrials, reset, numPics, dev: false }),
             success: function (data) {
                 console.log(data);
                 
@@ -44,9 +44,6 @@ $(document).ready(function(){
                 $("#loading").remove();
                 runExperiment(data.trials, subjCode, workerId, assignmentId, hitId);
                 jsPsych.pluginAPI.preloadImages(images, function(){}); 
-                    
-                
-                // });
             }
         })
     

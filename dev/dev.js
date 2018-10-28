@@ -25,7 +25,7 @@ $(document).ready(function(){
             url: 'http://'+document.domain+':'+PORT+'/trials',
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({subjCode, numTrials, reset}),
+            data: JSON.stringify({subjCode, numTrials, reset, dev: true }),
             success: function (data) {
                 console.log(data);
 

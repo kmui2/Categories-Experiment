@@ -35,32 +35,31 @@ app.listen(app.get('port'), function () {
   console.log("Node app is running at http://localhost:" + app.get('port'))
 })
 
-let images = {};
-let categoriesCount = {};
+let images = { dev: {}, prod: {}};
+let categoriesCount = { dev: {}, prod: {} };
 
 // create a new file to store category counts
-let categories = Object.keys(categoriesCount);
-let catPath = 'categoriesCount.csv';
-let headers = categories;
+const categoriesCountDevPath = 'categoriesCount.dev.csv';
+const categoriesCountProdPath = 'categoriesCount.prod.csv';
 
 
-if (fs.existsSync(catPath)){
+if (fs.existsSync(categoriesCountDevPath)){
   // Read existing category counts if csv exists.
   csv()
-  .fromFile(catPath)
-  .on('json', (jsonObj) => {categoriesCount =  jsonObj})
+  .fromFile(categoriesCountDevPath)
+  .on('json', (jsonObj) => {categoriesCount.dev =  jsonObj})
   .on('done', (error) => {
     if (error) throw error;
-    console.log(categoriesCount);
-    Object.keys(categoriesCount).forEach(category => {
+    console.log(categoriesCount.dev);
+    Object.keys(categoriesCount.dev).forEach(category => {
       const folderLocation = `dev/images/${category}`;
-      images[category] = [];
+      images.dev[category] = [];
       fs.readdirSync(folderLocation).forEach(file => {
-        images[category].push(path.join('images', category, file));
+        images.dev[category].push(path.join('images', category, file));
       })
     });
     writer = csvWriter({ sendHeaders: false });
-    writer.pipe(fs.createWriteStream(catPath, { flags: 'a' }));
+    writer.pipe(fs.createWriteStream(categoriesCountDevPath, { flags: 'a' }));
     writer.end();
   })
 } else {
@@ -68,23 +67,68 @@ if (fs.existsSync(catPath)){
   // Get all categories from image folders.
   fs.readdirSync('dev/images').forEach(folder => {
     if (folder != '.DS_Store') {
-      categoriesCount[folder] = 0;
-      images[folder] = [];
+      categoriesCount.dev[folder] = 0;
+      images.dev[folder] = [];
       fs.readdirSync('dev/images/' + folder).forEach(file => {
         if (file == 'TestItems') {
           fs.readdirSync('dev/images/' + folder + '/TestItems').forEach(file => {
             if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-              images[folder].push('images/' + folder + '/TestItems/' + file);
+              images.dev[folder].push('images/' + folder + '/TestItems/' + file);
           });
         }
         if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-          images[folder].push('images/' + folder + '/' + file);
+          images.dev[folder].push('images/' + folder + '/' + file);
       })
     }
   });
-  writer = csvWriter({ headers: headers });
-  writer.pipe(fs.createWriteStream(catPath, { flags: 'a' }));
-  writer.write(categoriesCount);
+  writer = csvWriter({ headers: Object.keys(categoriesCount.dev) });
+  writer.pipe(fs.createWriteStream(categoriesCountDevPath, { flags: 'a' }));
+  writer.write(categoriesCount.dev);
+  writer.end();
+}
+
+
+if (fs.existsSync(categoriesCountProdPath)){
+  // Read existing category counts if csv exists.
+  csv()
+  .fromFile(categoriesCountProdPath)
+  .on('json', (jsonObj) => {categoriesCount.prod =  jsonObj})
+  .on('done', (error) => {
+    if (error) throw error;
+    console.log(categoriesCount.prod);
+    Object.keys(categoriesCount.prod).forEach(category => {
+      const folderLocation = `prod/images/${category}`;
+      images.prod[category] = [];
+      fs.readdirSync(folderLocation).forEach(file => {
+        images.prod[category].push(path.join('images', category, file));
+      })
+    });
+    writer = csvWriter({ sendHeaders: false });
+    writer.pipe(fs.createWriteStream(categoriesCountProdPath, { flags: 'a' }));
+    writer.end();
+  })
+} else {
+  // Create new csv of category counts if doesn't exist.
+  // Get all categories from image folders.
+  fs.readdirSync('prod/images').forEach(folder => {
+    if (folder != '.DS_Store') {
+      categoriesCount.prod[folder] = 0;
+      images.prod[folder] = [];
+      fs.readdirSync('prod/images/' + folder).forEach(file => {
+        if (file == 'TestItems') {
+          fs.readdirSync('prod/images/' + folder + '/TestItems').forEach(file => {
+            if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+              images.prod[folder].push('images/' + folder + '/TestItems/' + file);
+          });
+        }
+        if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+          images.prod[folder].push('images/' + folder + '/' + file);
+      })
+    }
+  });
+  writer = csvWriter({ headers: Object.keys(categoriesCount.prod) });
+  writer.pipe(fs.createWriteStream(categoriesCountProdPath, { flags: 'a' }));
+  writer.write(categoriesCount.prod);
   writer.end();
 }
 
@@ -96,6 +140,9 @@ app.post('/trials', function (req, res) {
   let numTrials = req.body.numTrials;
   let numPics = req.body.numPics || 17;
   let reset = req.body.reset;
+  const dev = req.body.dev == true;
+  const env = dev ? 'dev' : 'prod';
+  console.log(`Trials Environment: ${env}`)
   console.log(req.body);
 
   // subject is not finished
@@ -111,7 +158,7 @@ app.post('/trials', function (req, res) {
           if (err) throw err;
 
           let subjCategories = data.split('\n').filter((c) => {return !completed.includes(c)});
-          let subjImages = Object.assign({}, images);
+          let subjImages = Object.assign({}, images[env]);
           for (let category in subjImages) {
             subjImages[category] = _.shuffle(subjImages[category]).slice(0, numPics);
           }
@@ -132,13 +179,13 @@ app.post('/trials', function (req, res) {
       if (fs.existsSync('data/' + subjCode + '_data.csv'))  fs.unlinkSync('data/' + subjCode + '_data.csv');
     }
 
-    let categories = _.shuffle(Object.keys(categoriesCount));
+    let categories = _.shuffle(Object.keys(categoriesCount[env]));
     let countLists = {};
     for (let cat of categories) {
-      if (!(categoriesCount[cat] in countLists))
-        countLists[categoriesCount[cat]] = [cat];
+      if (!(categoriesCount[env][cat] in countLists))
+        countLists[categoriesCount[env][cat]] = [cat];
       else 
-        countLists[categoriesCount[cat]].push(cat);
+        countLists[categoriesCount[env][cat]].push(cat);
     }
     
     // Add categories with the least count to subject trials
@@ -150,7 +197,7 @@ app.post('/trials', function (req, res) {
         for (let cat of countLists[count]) {
           if (subjCategories.length < numTrials) {
             subjCategories.push(cat);
-            categoriesCount[cat] = (Number(categoriesCount[cat]) + 1 )+'';
+            categoriesCount[env][cat] = (Number(categoriesCount[env][cat]) + 1 )+'';
           }
           else break;
         }
@@ -162,25 +209,28 @@ app.post('/trials', function (req, res) {
       console.log("Trials list saved!");
     });
 
-    let catPath = 'categoriesCount.csv';
+    const categoriesCountDevPath = 'categoriesCount.dev.csv';
+    const categoriesCountProdPath = 'categoriesCount.prod.csv';
+    const categoriesCountPath = dev ? categoriesCountDevPath : categoriesCountProdPath;
+
     let headers = categories;
-    if (!fs.existsSync(catPath))
+    if (!fs.existsSync(categoriesCountPath))
       writer = csvWriter({ headers: headers });
     else
       writer = csvWriter({ sendHeaders: false });
 
-    writer.pipe(fs.createWriteStream(catPath, { flags: 'a' }));
-    writer.write(categoriesCount);
+    writer.pipe(fs.createWriteStream(categoriesCountPath, { flags: 'a' }));
+    writer.write(categoriesCount[env]);
     writer.end();
 
-    let subjImages = Object.assign({}, images);
+    let subjImages = Object.assign({}, images[env]);
     for (let category in subjImages) {
       subjImages[category] = _.shuffle(subjImages[category]).slice(0, numPics);
     }
     let questions = _.shuffle(fs.readFileSync('IRQ_questions.txt').toString().replace(/\r/g, '\n').split('\n')).filter((line) => { return line.replace(/ /g, '').length > 0 });
     let trials = { categories: subjCategories, images: subjImages, questions: questions};
 
-    console.log(categoriesCount);
+    console.log(categoriesCount[env]);
     res.send({ success: true, trials: trials });
 
   }
