@@ -22,6 +22,9 @@ app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+  res.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+  res.setHeader("Expires", "0"); // Proxies.
   next();
 });
 
