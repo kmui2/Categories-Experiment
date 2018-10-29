@@ -70,18 +70,21 @@ if (fs.existsSync(categoriesCountDevPath)){
   // Get all categories from image folders.
   fs.readdirSync('dev/images').forEach(folder => {
     if (folder != '.DS_Store') {
-      categoriesCount.dev[folder] = 0;
-      images.dev[folder] = [];
-      fs.readdirSync('dev/images/' + folder).forEach(file => {
-        if (file == 'TestItems') {
-          fs.readdirSync('dev/images/' + folder + '/TestItems').forEach(file => {
-            if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-              images.dev[folder].push('images/' + folder + '/TestItems/' + file);
-          });
-        }
-        if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-          images.dev[folder].push('images/' + folder + '/' + file);
-      })
+      // Check for image folders that are non-empty
+      if (fs.readdirSync('dev/images/' + folder).length > 0) {
+        categoriesCount.dev[folder] = 0;
+        images.dev[folder] = [];
+        fs.readdirSync('dev/images/' + folder).forEach(file => {
+          if (file == 'TestItems') {
+            fs.readdirSync('dev/images/' + folder + '/TestItems').forEach(file => {
+              if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+                images.dev[folder].push('images/' + folder + '/TestItems/' + file);
+            });
+          }
+          if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+            images.dev[folder].push('images/' + folder + '/' + file);
+        })
+      }
     }
   });
   writer = csvWriter({ headers: Object.keys(categoriesCount.dev) });
@@ -115,18 +118,20 @@ if (fs.existsSync(categoriesCountProdPath)){
   // Get all categories from image folders.
   fs.readdirSync('prod/images').forEach(folder => {
     if (folder != '.DS_Store') {
-      categoriesCount.prod[folder] = 0;
-      images.prod[folder] = [];
-      fs.readdirSync('prod/images/' + folder).forEach(file => {
-        if (file == 'TestItems') {
-          fs.readdirSync('prod/images/' + folder + '/TestItems').forEach(file => {
-            if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-              images.prod[folder].push('images/' + folder + '/TestItems/' + file);
-          });
-        }
-        if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
-          images.prod[folder].push('images/' + folder + '/' + file);
-      })
+      if (fs.readdirSync('prod/images/' + folder)) {
+        categoriesCount.prod[folder] = 0;
+        images.prod[folder] = [];
+        fs.readdirSync('prod/images/' + folder).forEach(file => {
+          if (file == 'TestItems') {
+            fs.readdirSync('prod/images/' + folder + '/TestItems').forEach(file => {
+              if (!['.DS_Store', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+                images.prod[folder].push('images/' + folder + '/TestItems/' + file);
+            });
+          }
+          if (!['.DS_Store', 'TestItems', 'Thumbs.db', 'extra', 'AMC5143AAS_COB_370.jpe'].includes(file))
+            images.prod[folder].push('images/' + folder + '/' + file);
+        })
+      }
     }
   });
   writer = csvWriter({ headers: Object.keys(categoriesCount.prod) });
