@@ -42,7 +42,7 @@ function runExperiment(trials, subjCode, workerId, assignmentId, hitId) {
     // let welcome_block = {
     //     type: "text",
     //     cont_key: ' ',
-    //     text: `<h1>Categories Experiment</h1>
+    //     text: `<h1>Naming Categories</h1>
     //     <p class="lead">Welcome to the experiment. Thank you for participating! Press SPACE to begin.</p>`
     // };
 
